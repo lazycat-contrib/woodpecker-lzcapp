@@ -1,0 +1,67 @@
+application:
+  subdomain: woodpecker
+  multi_instance: false
+  # Login goes through the forge's OAuth page (redirect to Gitea -> back to
+  # /authorize). A platform gate in front would break the OAuth redirect
+  # chain, so the entry is public per the papra/gitea precedent.
+  public_path:
+    - /
+  upstreams:
+    - location: /
+      backend: http://server:8000/
+services:
+  server:
+    # upstream: woodpeckerci/woodpecker-server:v3.20.1
+    image: docker.1ms.run/woodpeckerci/woodpecker-server:v3.20.1
+    environment:
+      - WOODPECKER_HOST=https://{{ .S.AppDomain }}
+      # Login is forge OAuth only (no local accounts upstream). Wire it to the
+      # user's own Gitea instance - the OAuth app is created in Gitea by the
+      # user (self-service), callback must be https://<this-domain>/authorize.
+      - WOODPECKER_GITEA=true
+      - WOODPECKER_GITEA_URL={{ .U.gitea_url }}
+      - WOODPECKER_GITEA_CLIENT={{ .U.gitea_client }}
+      - WOODPECKER_GITEA_SECRET={{ .U.gitea_secret }}
+      - WOODPECKER_ADMIN={{ .U.admin_user }}
+      - WOODPECKER_AGENT_SECRET={{ .U.agent_secret }}
+      - TZ=Asia/Shanghai
+    binds:
+      - /lzcapp/var/data:/var/lib/woodpecker
+    stop_grace_period: 30s
+  agent:
+    # upstream: woodpeckerci/woodpecker-agent:v3.20.1
+    image: docker.1ms.run/woodpeckerci/woodpecker-agent:v3.20.1
+    environment:
+      - WOODPECKER_SERVER=server:9000
+      - WOODPECKER_AGENT_SECRET={{ .U.agent_secret }}
+      - WOODPECKER_MAX_WORKFLOWS=2
+      - TZ=Asia/Shanghai
+    binds:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /lzcapp/var/agent-config:/etc/woodpecker
+    depends_on:
+      - server
+usage: |
+  Woodpecker CI 是一个简洁而强大的开源 CI/CD 引擎：代码推送后自动按
+  .woodpecker.yaml 运行流水线，构建步骤以 Docker 容器执行。
+
+  使用前提（必须先完成）：
+    1. 你需要一个 Gitea 实例（本应用通过它登录和拉取代码）。
+    2. 在 Gitea 的 用户设置 -> 应用 中创建一个 OAuth2 应用，
+       回调地址填：https://<本应用入口域名>/authorize
+    3. 把 Gitea 地址、OAuth Client ID、Client Secret 填入本应用的
+       部署参数（首次安装时），并填一个 Gitea 管理员用户名作为
+       Woodpecker 管理员。
+
+  首次使用：
+    - 打开应用入口，点登录会跳转到你的 Gitea 授权页，授权后回到
+      Woodpecker 即为管理员（与部署参数里填的用户名一致）。
+    - 在仓库设置里启用仓库后，推送代码即可触发流水线。
+
+  说明：
+    - 内置 agent 通过挂载 docker.sock 执行构建容器（已获得环境许可），
+      流水线里的容器能访问宿主机 Docker；请只在可信环境启用，并在
+      流水线 YAML 中谨慎使用 trusted 权限。
+    - SQLite 数据库存于应用数据目录，保存用户、仓库与构建历史。
+    - 本应用依赖你自备的 Gitea OAuth 应用（自助创建，无需第三方）。
+    - 未做实机验证。

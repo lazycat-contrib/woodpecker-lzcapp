@@ -1,0 +1,49 @@
+params:
+  - id: gitea_url
+    type: string
+    name: Gitea URL
+    description: "Base URL of your Gitea instance, e.g. https://git.example.com"
+    default_value: ""
+    optional: false
+  - id: gitea_client
+    type: string
+    name: OAuth Client ID
+    description: "OAuth2 client id of the application you created in Gitea (callback: https://<app-domain>/authorize)"
+    default_value: ""
+    optional: false
+  - id: gitea_secret
+    type: secret
+    name: OAuth Client Secret
+    description: "OAuth2 client secret from the same Gitea application"
+    default_value: "$random(len=32)"
+    optional: false
+  - id: admin_user
+    type: string
+    name: Admin username
+    description: "Your Gitea username to grant Woodpecker admin rights"
+    default_value: ""
+    optional: false
+  - id: agent_secret
+    type: secret
+    name: Agent shared secret
+    description: "Shared secret between server and agent. Random by default."
+    default_value: "$random(len=32)"
+    optional: false
+
+locales:
+  zh:
+    gitea_url:
+      name: Gitea 地址
+      description: 你的 Gitea 实例地址，例如 https://git.example.com
+    gitea_client:
+      name: OAuth Client ID
+      description: 在 Gitea 创建的 OAuth2 应用 Client ID（回调地址填 https://<应用域名>/authorize）
+    gitea_secret:
+      name: OAuth Client Secret
+      description: 同一 Gitea 应用的 Client Secret
+    admin_user:
+      name: 管理员用户名
+      description: 你在 Gitea 的用户名，将被授予 Woodpecker 管理员权限
+    agent_secret:
+      name: Agent 共享密钥
+      description: server 与 agent 之间的共享密钥，默认随机生成

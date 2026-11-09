@@ -1,0 +1,18 @@
+package: community.lazycat.app.woodpecker
+name: Woodpecker CI
+description: "Simple, yet powerful CI/CD engine with great extensibility. Connects to a Gitea forge; pipelines run as Docker containers on the built-in agent."
+version: 3.20.1
+min_os_version: "1.5.0"
+homepage: https://github.com/woodpecker-ci/woodpecker
+author: Woodpecker CI contributors
+license: Apache-2.0
+permissions:
+  required:
+    - net.internet
+locales:
+  zh:
+    name: Woodpecker CI
+    description: "简洁而强大的 CI/CD 引擎：连接 Gitea 仓库后按提交自动跑流水线，构建步骤以 Docker 容器运行。"
+  en:
+    name: Woodpecker CI
+    description: "Simple, yet powerful CI/CD engine with great extensibility. Connects to a Gitea forge; pipelines run as Docker containers on the built-in agent."

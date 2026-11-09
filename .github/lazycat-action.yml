@@ -1,0 +1,37 @@
+version: 1
+project:
+  root: .
+  build_config: lzc-build.yml
+  package_file: package.yml
+  output: dist/application.lpk
+  target_arch: amd64
+update:
+  strategy: publish
+  allow_downgrade: false
+  version_source:
+    type: image
+    image: woodpecker-server
+build:
+  toolchains: []
+  run_buildscript: false
+images:
+  - id: woodpecker-server
+    target: service
+    service: server
+    source: woodpeckerci/woodpecker-server
+    channel: stable
+    sort: semver
+    tag_regex: ^v?[0-9]+[.][0-9]+[.][0-9]+$
+    delivery:
+      mode: mirror
+      require_digest_match: true
+  - id: woodpecker-agent
+    target: service
+    service: agent
+    source: woodpeckerci/woodpecker-agent
+    channel: stable
+    sort: semver
+    tag_regex: ^v?[0-9]+[.][0-9]+[.][0-9]+$
+    delivery:
+      mode: mirror
+      require_digest_match: true
